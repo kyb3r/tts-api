@@ -5,6 +5,8 @@ from pathlib import Path
 import os
 import zlib
 
+import threading
+
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from core import DanielVoice, Speech, BulkSpeech
@@ -20,13 +22,18 @@ def index():
 
 @app.on_event('startup')
 async def on_startup():
-    # global engine 
+    global engine 
+    global lock 
+
+    engine = DanielVoice(speed=180)
+    lock = threading.Lock()
     print("INFO:     Initialised tts engine")
+
+
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    # engine.stop()
-    pass
+    engine.stop()
 
 def stream_files(*files):
     buffer = BytesIO()
@@ -57,26 +64,23 @@ def stream_files(*files):
 
 @app.post("/generate_speech")
 def generate_speech(request: Speech):
-    engine = DanielVoice(speed=180)
-
     tempfile_name = tempfile.mktemp(suffix=".mp3")
 
-    engine.await_synthesis()
-    engine.save_to_file(request.text, tempfile_name)
-    engine.await_synthesis()
+    with lock.acquire():
+        engine.save_to_file(request.text, tempfile_name)
+        engine.await_synthesis()
 
     return stream_files(tempfile_name)
 
 
 @app.post("/generate_speech/bulk")
 def bulk_generate_speech(request: BulkSpeech):
-    engine = DanielVoice(speed=180)
 
     tempdir = tempfile.mkdtemp()
     tempfiles = []
 
-    engine.await_synthesis()
-
+    lock.acquire()
+        
     for index, text in enumerate(request.text):
         tf = Path(tempdir) / str(index)
         engine.save_to_file(text, tf)
@@ -84,6 +88,8 @@ def bulk_generate_speech(request: BulkSpeech):
 
     print(f'Generating in bulk for {len(tempfiles)} files')
     engine.await_synthesis()
+
+    lock.release()
 
     return stream_files(*tempfiles)
 
