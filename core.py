@@ -26,8 +26,10 @@ class DanielVoice:
     
     def await_synthesis(self):
         self.engine.runAndWait()
-        self.engine.stop()
         print('Finished synthesis')
+    
+    def stop(self):
+        self.engine.stop()
 
     def save_to_file(self, text, file):
         self.engine.save_to_file(text, str(file))

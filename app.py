@@ -14,11 +14,19 @@ import bson
 
 app = FastAPI()
 
-
 @app.get("/")
 def index():
     return "Welcome to the daniel uk tts API"
 
+@app.on_event('startup')
+async def on_startup():
+    global engine 
+    engine = DanielVoice(speed=180)
+    print("INFO:     Initialised tts engine")
+
+@app.on_event('shutdown')
+async def on_shutdown():
+    engine.stop()
 
 def stream_files(*files):
     buffer = BytesIO()
@@ -51,7 +59,6 @@ def stream_files(*files):
 def generate_speech(request: Speech):
     tempfile_name = tempfile.mktemp(suffix=".mp3")
 
-    engine = DanielVoice(request.speed)
     engine.save_to_file(request.text, tempfile_name)
     engine.await_synthesis()
 
@@ -60,7 +67,6 @@ def generate_speech(request: Speech):
 
 @app.post("/generate_speech/bulk")
 def bulk_generate_speech(request: BulkSpeech):
-    engine = DanielVoice(request.speed)
 
     tempdir = tempfile.mkdtemp()
     tempfiles = []
@@ -74,3 +80,4 @@ def bulk_generate_speech(request: BulkSpeech):
     engine.await_synthesis()
 
     return stream_files(*tempfiles)
+
