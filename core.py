@@ -29,7 +29,7 @@ class DanielVoice:
         self.engine.stop()
 
     def save_to_file(self, text, file):
-        self.engine.save_to_file(text, file)
+        self.engine.save_to_file(text, str(file))
 
 class Speech(BaseModel):
     speed: int = 180

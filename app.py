@@ -2,6 +2,7 @@ from typing import Dict
 from io import BytesIO
 from zipfile import ZipFile
 import tempfile
+from pathlib import Path
 import os
 
 from fastapi import FastAPI
@@ -24,6 +25,7 @@ def stream_files(*files):
     media_type = None
 
     if len(files) > 1:
+        files = sorted(files, key=lambda f: int(os.path.basename(f))) # sort by making filenames integers
         media_type = "application/octet-stream"
         contents = []
 
@@ -60,12 +62,13 @@ def generate_speech(request: Speech):
 def bulk_generate_speech(request: BulkSpeech):
     engine = DanielVoice(request.speed)
 
+    tempdir = tempfile.mkdtemp()
     tempfiles = []
 
-    for text in request.text:
-        tempfile_name = tempfile.mktemp(suffix=".mp3")
-        tempfiles.append(tempfile_name)
-        engine.save_to_file(text, tempfile_name)
+    for index, text in enumerate(request.text):
+        tf = Path(tempdir) / str(index)
+        engine.save_to_file(text, tf)
+        tempfiles.append(tf)
 
     print(f'Generating in bulk for {len(tempfiles)} files')
     engine.await_synthesis()
