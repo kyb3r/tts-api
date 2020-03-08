@@ -59,6 +59,7 @@ def stream_files(*files):
 def generate_speech(request: Speech):
     tempfile_name = tempfile.mktemp(suffix=".mp3")
 
+    engine.await_synthesis()
     engine.save_to_file(request.text, tempfile_name)
     engine.await_synthesis()
 
@@ -70,6 +71,8 @@ def bulk_generate_speech(request: BulkSpeech):
 
     tempdir = tempfile.mkdtemp()
     tempfiles = []
+
+    engine.await_synthesis()
 
     for index, text in enumerate(request.text):
         tf = Path(tempdir) / str(index)

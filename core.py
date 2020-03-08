@@ -26,7 +26,6 @@ class DanielVoice:
     
     def await_synthesis(self):
         self.engine.runAndWait()
-        self.stop()
         print('Finished synthesis')
     
     def stop(self):
