@@ -80,6 +80,7 @@ def restart_speech_process():
         if p.info["name"] and "com.apple.speech.speechsynthesisd" in p.info["name"]
     ]
     if not matches:
+
         return
     else:
         os.kill(matches[0], signal.SIGKILL)
@@ -97,12 +98,12 @@ def retry(num=5):
                 else:
                     print("\n\n\n\n\nRESTARTING SPEECH PROCESS", end="-----------\n\n\n\n\n")
                     restart_speech_process()
+                    engine.stop()
+                    engine.init()
 
         return new_func
 
     return decorator
-
-
 
 @app.get("/")
 def index():

@@ -4,11 +4,11 @@ from pydantic import BaseModel
 
 class DanielVoice:
     def __init__(self, speed=180):
-        self.engine = pyttsx3.init()
         self.speed = speed
-        self.setup()
+        self.init()
     
-    def setup(self):
+    def init(self):
+        self.engine = pyttsx3.init()
         self.engine.setProperty("rate", self.speed)
         self.engine.setProperty("rate", self.speed)
         voices = self.engine.getProperty("voices")
