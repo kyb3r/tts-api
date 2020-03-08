@@ -1,6 +1,6 @@
 # Daniel (UK) Text To Speech API
 
-Implementation of an API that runs on OSX that serves the high quality Daniel voice that ships with Macs. Existing voices that work with SAPI5 on windows do not have the same level of fidelity.
+Implementation of an API that runs on OSX that serves the high quality Daniel voice that ships with Macs. Existing voices that work with SAPI5 on windows have much worse quality. 
 
 ## Prerequisites
 
