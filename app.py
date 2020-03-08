@@ -1,9 +1,9 @@
 from typing import Dict
 from io import BytesIO
-from zipfile import ZipFile
 import tempfile
 from pathlib import Path
 import os
+import zlib
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
@@ -34,7 +34,7 @@ def stream_files(*files):
                 contents.append(f.read())
             os.remove(audio_file)
 
-        buffer.write(bson.dumps({'data': contents}))
+        buffer.write(zlib.compress(bson.dumps({'data': contents})))
         buffer.seek(0)
     else:
         file = files[0]

@@ -1,19 +1,33 @@
 import requests
 import bson 
-
+import zlib
+import time
+import os 
 
 def decode_response(content):
     return bson.loads(content)['data']
 
 data = {
-    'text': ['hi there whats up', 'my name is bob.'] * 10
+    'text': ['hi there whats up', 'my name is bob.'] * 100
 }
 
 print('Making request')
 
-response = requests.post('http://104.168.136.18:6969/generate_speech/bulk', json=data)
+response = requests.post(os.getenv('HOST') + '/generate_speech/bulk', json=data, stream=True)
 response.raise_for_status()
 print('done')
+
+
+
+start = time.time()
+
+print(len(response.content)/(10**6))
+print((time.time()-start)/1000)
+
+print('compressing')
+print(len(zlib.decompress(response.content))/(10**6))
+print('finished compressing')
+print()
 
 print('decoding response')
 data = decode_response(response.content)
@@ -26,11 +40,8 @@ for i, file_data in enumerate(data):
 
 print('Done')
 
-import time 
-
 time.sleep(10)
 
-import os 
 
 for file in os.listdir(): 
     if file.endswith('.mp3'):
