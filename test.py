@@ -6,7 +6,7 @@ def decode_response(content):
     return bson.loads(content)['data']
 
 data = {
-    'text': ['hi there whats up', 'my name is bob.'] * 100
+    'text': ['hi there whats up', 'my name is bob.'] * 10
 }
 
 print('Making request')
@@ -35,3 +35,4 @@ import os
 for file in os.listdir(): 
     if file.endswith('.mp3'):
         os.remove(file)
+
