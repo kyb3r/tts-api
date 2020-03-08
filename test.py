@@ -22,15 +22,18 @@ print('done')
 start = time.time()
 
 print(len(response.content)/(10**6))
-print((time.time()-start)/1000)
+print((time.time()-start))
 
-print('compressing')
-print(len(zlib.decompress(response.content))/(10**6))
-print('finished compressing')
+
+
+print('decompressing')
+content = zlib.decompress(response.content)
+print(len(content)/(10**6))
+print('finished decompressing')
 print()
 
 print('decoding response')
-data = decode_response(response.content)
+data = decode_response(content)
 print('done')
 
 print('writing files')
