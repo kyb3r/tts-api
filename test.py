@@ -11,7 +11,7 @@ data = {
 
 print('Making request')
 
-response = requests.post('http://127.0.0.1:8000/generate_speech/bulk', json=data)
+response = requests.post('http://104.168.136.18:6969/generate_speech/bulk', json=data)
 response.raise_for_status()
 print('done')
 

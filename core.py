@@ -27,9 +27,11 @@ class DanielVoice:
     def await_synthesis(self):
         self.engine.runAndWait()
         self.engine.stop()
+        print('Finished synthesis')
 
     def save_to_file(self, text, file):
         self.engine.save_to_file(text, str(file))
+        print(f'Generating: {text}')
 
 class Speech(BaseModel):
     speed: int = 180
