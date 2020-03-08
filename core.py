@@ -33,7 +33,7 @@ class DanielVoice:
 
     def save_to_file(self, text, file):
         self.engine.save_to_file(text, str(file))
-        print(f'Generating: {text}')
+        # print(f'Generating: {text}')
 
 class Speech(BaseModel):
     speed: int = 180
@@ -41,3 +41,5 @@ class Speech(BaseModel):
 
 class BulkSpeech(Speech):
     text: list
+
+
