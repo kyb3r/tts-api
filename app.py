@@ -31,8 +31,6 @@ def stream_files(*files):
             with open(audio_file, 'rb') as f:
                 contents.append(f.read())
                 os.remove(audio_file)
-        
-        print(contents)
 
         buffer.write(bson.dumps({'data': contents}))
         buffer.seek(0)
@@ -69,6 +67,7 @@ def bulk_generate_speech(request: BulkSpeech):
         tempfiles.append(tempfile_name)
         engine.save_to_file(text, tempfile_name)
 
+    print(f'Generating in bulk for {len(tempfiles)} files')
     engine.await_synthesis()
 
     return stream_files(*tempfiles)
