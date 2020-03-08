@@ -97,9 +97,10 @@ def retry(num=5):
                     return ret
                 else:
                     print("\n\n\n\n\nRESTARTING SPEECH PROCESS", end="-----------\n\n\n\n\n")
-                    restart_speech_process()
-                    engine.stop()
-                    engine.init()
+                    with lock.acquire():
+                        restart_speech_process()
+                        engine.stop()
+                        engine.init()
 
         return new_func
 
