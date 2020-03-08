@@ -32,7 +32,7 @@ def stream_files(*files):
         for audio_file in files:
             with open(audio_file, 'rb') as f:
                 contents.append(f.read())
-                os.remove(audio_file)
+            os.remove(audio_file)
 
         buffer.write(bson.dumps({'data': contents}))
         buffer.seek(0)
