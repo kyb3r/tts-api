@@ -20,13 +20,12 @@ def index():
 
 @app.on_event('startup')
 async def on_startup():
-    global engine 
-    engine = DanielVoice(speed=180)
+    # global engine 
     print("INFO:     Initialised tts engine")
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    engine.stop()
+    # engine.stop()
 
 def stream_files(*files):
     buffer = BytesIO()
@@ -57,6 +56,8 @@ def stream_files(*files):
 
 @app.post("/generate_speech")
 def generate_speech(request: Speech):
+    engine = DanielVoice(speed=180)
+
     tempfile_name = tempfile.mktemp(suffix=".mp3")
 
     engine.await_synthesis()
@@ -68,6 +69,7 @@ def generate_speech(request: Speech):
 
 @app.post("/generate_speech/bulk")
 def bulk_generate_speech(request: BulkSpeech):
+    engine = DanielVoice(speed=180)
 
     tempdir = tempfile.mkdtemp()
     tempfiles = []
