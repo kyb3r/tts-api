@@ -57,7 +57,7 @@ def stream_files(*files):
         if all(not x for x in contents):
             return SpeechProcessDeadError
 
-        buffer.write(zlib.compress(bson.dumps({"data": contents})))
+        buffer.write(zlib.compress(bson.encode({"data": contents})))
         buffer.seek(0)
     else:
         file = files[0]

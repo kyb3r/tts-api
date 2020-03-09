@@ -9,9 +9,9 @@ verify_ssl = true
 pyttsx3 = "*"
 fastapi = "*"
 uvicorn = "*"
-bson = "*"
 requests = "*"
 psutil = "*"
+pymongo = "*"
 
 [requires]
 python_version = "3.8"
