@@ -8,7 +8,7 @@ import zlib
 import threading
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from core import DanielVoice, Speech, BulkSpeech
 import bson
 import psutil
