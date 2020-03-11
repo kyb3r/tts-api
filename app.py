@@ -8,16 +8,16 @@ import zlib
 import threading
 
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
 from core import DanielVoice, Speech, BulkSpeech
 import bson
 import psutil
+import asyncio
 
 # import zlib
 
 
 app = FastAPI()
-
 
 @app.on_event("startup")
 async def on_startup():
@@ -26,7 +26,33 @@ async def on_startup():
 
     engine = DanielVoice(speed=180)
     lock = threading.Lock()
+    asyncio.create_task(speech_process_killer_loop())
+
     print("INFO:     Initialised tts engine")
+
+
+async def speech_process_killer_loop():
+    '''Try to kill speech process every 5 mins
+    because for some reason with prolonged used, 
+    the output files from the tts process are empty
+    '''
+    while True:
+        print('Killing speech process')
+        restart_speech_process()
+        await asyncio.sleep(60)
+
+
+def restart_speech_process():
+    with lock:
+        matches = [
+            p.info["pid"]
+            for p in psutil.process_iter(attrs=["pid", "name"])
+            if p.info["name"] and "com.apple.speech.speechsynthesisd" in p.info["name"]
+        ]
+        if not matches:
+            return
+        else:
+            os.kill(matches[0], signal.SIGKILL)
 
 
 @app.on_event("shutdown")
@@ -73,18 +99,6 @@ def stream_files(*files):
     return StreamingResponse(buffer, media_type=media_type)
 
 
-def restart_speech_process():
-    matches = [
-        p.info["pid"]
-        for p in psutil.process_iter(attrs=["pid", "name"])
-        if p.info["name"] and "com.apple.speech.speechsynthesisd" in p.info["name"]
-    ]
-    if not matches:
-
-        return
-    else:
-        os.kill(matches[0], signal.SIGKILL)
-
 import functools
 
 def retry(num=5):
@@ -97,7 +111,7 @@ def retry(num=5):
                     return ret
                 else:
                     print("\n\n\n\n\nRESTARTING SPEECH PROCESS", end="-----------\n\n\n\n\n")
-                    with lock.acquire():
+                    with lock:
                         restart_speech_process()
                         engine.stop()
                         engine.init()
@@ -115,7 +129,7 @@ def index():
 def generate_speech(request: Speech):
     tempfile_name = tempfile.mktemp(suffix=".mp3")
 
-    with lock.acquire():
+    with lock:
         engine.save_to_file(request.text, tempfile_name)
         engine.await_synthesis()
 
