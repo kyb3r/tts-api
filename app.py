@@ -66,37 +66,28 @@ class SpeechProcessDeadError:  # sometimes the nsss speech process dies and just
 
 def stream_files(*files):
     buffer = BytesIO()
-    media_type = None
+    media_type = "application/octet-stream"
 
-    if len(files) > 1:
-        files = sorted(
-            files, key=lambda f: int(os.path.basename(f))
-        )  # sort by making filenames integers
-        media_type = "application/octet-stream"
-        contents = []
+    files = sorted(
+        files, key=lambda f: int(os.path.basename(f))
+    )  # sort by making filenames integers
+    
+    contents = []
 
-        for audio_file in files:
-            with open(audio_file, "rb") as f:
-                contents.append(f.read())
-            os.remove(audio_file)
+    for audio_file in files:
+        with open(audio_file, "rb") as f:
+            contents.append(f.read())
+        os.remove(audio_file)
 
-        if all(not x for x in contents):
-            return SpeechProcessDeadError
+    if all(not x for x in contents):
+        return SpeechProcessDeadError
 
-        buffer.write(zlib.compress(bson.encode({"data": contents})))
-        buffer.seek(0)
-    else:
-        file = files[0]
-        media_type = "audio/mpeg"
-        with open(file, "rb") as f:
-            content = f.read()
-            if not content:
-                return SpeechProcessDeadError
-            buffer.write()
-            buffer.seek(0)
-        os.remove(file)
+    data = zlib.compress(bson.encode({"data": contents}))
+    headers = {'content-length': len(data)}
+    buffer.write(data)
+    buffer.seek(0)
 
-    return StreamingResponse(buffer, media_type=media_type)
+    return StreamingResponse(buffer, media_type=media_type, headers=headers)
 
 
 import functools
