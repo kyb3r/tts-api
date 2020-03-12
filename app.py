@@ -83,7 +83,7 @@ def stream_files(*files):
         return SpeechProcessDeadError
 
     data = zlib.compress(bson.encode({"data": contents}))
-    headers = {'content-length': len(data)}
+    headers = {'content-length': str(len(data))}
     buffer.write(data)
     buffer.seek(0)
 
