@@ -25,7 +25,7 @@ async def on_startup():
     global lock
 
     engine = DanielVoice(speed=180)
-    lock = threading.Lock()
+    lock = threading.RLock()
     asyncio.create_task(speech_process_killer_loop())
 
     print("INFO:     Initialised tts engine")
