@@ -84,7 +84,9 @@ def stream_files(*files):
             contents.append(f.read())
         os.remove(audio_file)
 
-    if all(not x for x in contents):
+    length = len(contents)
+    empty = sum(1 for x for x in contents if not x)
+    if empty/length > 0.1:
         return SpeechProcessDeadError
 
     data = zlib.compress(bson.encode({"data": contents}))
