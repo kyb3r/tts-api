@@ -7,7 +7,7 @@ import zlib
 
 import threading
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
 from core import DanielVoice, Speech, BulkSpeech
 import bson
@@ -85,7 +85,7 @@ def stream_files(*files):
         os.remove(audio_file)
 
     length = len(contents)
-    empty = sum(1 for x for x in contents if not x)
+    empty = sum(1 for x in contents if not x)
     if empty/length > 0.1:
         return SpeechProcessDeadError
 
