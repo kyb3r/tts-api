@@ -37,12 +37,12 @@ async def speech_process_killer_loop():
     the output files from the tts process are empty
     '''
     while True:
-        print('Killing speech process')
         restart_speech_process()
         await asyncio.sleep(60)
 
 
 def restart_speech_process():
+    print("KILLING SPEECH PROCESS")
     with lock:
         matches = [
             p.info["pid"]
