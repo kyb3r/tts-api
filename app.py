@@ -59,6 +59,11 @@ def restart_speech_process():
 async def on_shutdown():
     engine.stop()
 
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    response = await call_next(request)
+    restart_speech_process()
+    return response
 
 class SpeechProcessDeadError:  # sometimes the nsss speech process dies and just creates empty files
     pass
