@@ -9,7 +9,7 @@ import threading
 import subprocess
 
 from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from core import DanielVoice, Speech, BulkSpeech
 import bson
 import psutil
@@ -87,11 +87,11 @@ def stream_files(*files):
         return SpeechProcessDeadError
 
     data = zlib.compress(bson.encode({"data": contents}))
-    headers = {"content-length": str(len(data))}
-    buffer.write(data)
-    buffer.seek(0)
 
-    return StreamingResponse(buffer, media_type=media_type, headers=headers)
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(data)
+    
+    return FileResponse(f.name)
 
 
 import functools
@@ -127,24 +127,12 @@ def index():
 
 @app.post("/generate_speech")
 def generate_speech(request: Speech):
-    tempfile_name = tempfile.mktemp()
-
-    print('starting synthesis')
-    subprocess.run(["say", "-v", "daniel", "-o", tempfile_name, request.text])
-    print("generated speech for:", request.text[:20]+'...')
-
-    buffer = BytesIO()
-
-    with open(tempfile_name + ".aiff", "rb") as f:
-        data = f.read()
-        buffer.write(data)
-        buffer.seek(0)
-        os.remove(tempfile_name + ".aiff")
-
-    media_type = "application/octet-stream"
-    headers = {"content-length": str(len(data))}
-
-    return StreamingResponse(buffer, media_type=media_type, headers=headers)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.aiff') as f:
+        print(f.name)
+        print("starting synthesis")
+        subprocess.run(["say", "-v", "daniel", "-o", f.name, request.text])
+        print("generated speech for:", request.text[:20] + "...")
+        return FileResponse(f.name)
 
 
 @app.post("/generate_speech/bulk")
