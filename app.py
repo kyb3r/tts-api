@@ -6,6 +6,7 @@ import os, signal
 import zlib
 
 import threading
+import subprocess
 
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
@@ -118,15 +119,24 @@ def index():
     return "Welcome to the daniel uk tts API"
 
 @app.post("/generate_speech")
-@retry(5)
 def generate_speech(request: Speech):
-    tempfile_name = tempfile.mktemp(suffix=".mp3")
-
+    tempfile_name = tempfile.mktemp()
+    
     with lock:
-        engine.save_to_file(request.text, tempfile_name)
-        engine.await_synthesis()
+        subprocess.run(['say', '-v', 'daniel', '-o', tempfile_name, request.text])
 
-    return stream_files(tempfile_name)
+    buffer = BytesIO()
+    
+    with open(tempfile_name+'.aiff', 'rb') as f:
+        data = f.read()
+        buffer.write(data)
+        buffer.seek(0)
+        os.remove(tempfile_name+'.aiff')
+
+    media_type = "application/octet-stream"
+    headers = {'content-length': str(len(data))}
+
+    return StreamingResponse(buffer, media_type=media_type, headers=headers)    
 
 @app.post("/generate_speech/bulk")
 @retry(5)
