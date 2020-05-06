@@ -20,6 +20,7 @@ import asyncio
 
 app = FastAPI()
 
+
 @app.on_event("startup")
 async def on_startup():
     global engine
@@ -33,10 +34,10 @@ async def on_startup():
 
 
 async def speech_process_killer_loop():
-    '''Try to kill speech process every 5 mins
+    """Try to kill speech process every 5 mins
     because for some reason with prolonged used, 
     the output files from the tts process are empty
-    '''
+    """
     while True:
         restart_speech_process()
         await asyncio.sleep(60)
@@ -72,7 +73,7 @@ def stream_files(*files):
     files = sorted(
         files, key=lambda f: int(os.path.basename(f))
     )  # sort by making filenames integers
-    
+
     contents = []
 
     for audio_file in files:
@@ -82,11 +83,11 @@ def stream_files(*files):
 
     length = len(contents)
     empty = sum(1 for x in contents if not x)
-    if empty/length > 0.1:
+    if empty / length > 0.1:
         return SpeechProcessDeadError
 
     data = zlib.compress(bson.encode({"data": contents}))
-    headers = {'content-length': str(len(data))}
+    headers = {"content-length": str(len(data))}
     buffer.write(data)
     buffer.seek(0)
 
@@ -94,6 +95,7 @@ def stream_files(*files):
 
 
 import functools
+
 
 def retry(num=5):
     def decorator(func):
@@ -104,7 +106,10 @@ def retry(num=5):
                 if ret != SpeechProcessDeadError:
                     return ret
                 else:
-                    print("\n\n\n\n\nRESTARTING SPEECH PROCESS", end="-----------\n\n\n\n\n")
+                    print(
+                        "\n\n\n\n\nRESTARTING SPEECH PROCESS",
+                        end="-----------\n\n\n\n\n",
+                    )
                     restart_speech_process()
                     with lock:
                         engine.stop()
@@ -114,29 +119,33 @@ def retry(num=5):
 
     return decorator
 
+
 @app.get("/")
 def index():
     return "Welcome to the daniel uk tts API"
 
+
 @app.post("/generate_speech")
 def generate_speech(request: Speech):
     tempfile_name = tempfile.mktemp()
-    
+
     with lock:
-        subprocess.run(['say', '-v', 'daniel', '-o', tempfile_name, request.text])
+        subprocess.run(["say", "-v", "daniel", "-o", tempfile_name, request.text])
+        print("generated speech for:", request.text)
 
     buffer = BytesIO()
-    
-    with open(tempfile_name+'.aiff', 'rb') as f:
+
+    with open(tempfile_name + ".aiff", "rb") as f:
         data = f.read()
         buffer.write(data)
         buffer.seek(0)
-        os.remove(tempfile_name+'.aiff')
+        os.remove(tempfile_name + ".aiff")
 
     media_type = "application/octet-stream"
-    headers = {'content-length': str(len(data))}
+    headers = {"content-length": str(len(data))}
 
-    return StreamingResponse(buffer, media_type=media_type, headers=headers)    
+    return StreamingResponse(buffer, media_type=media_type, headers=headers)
+
 
 @app.post("/generate_speech/bulk")
 @retry(5)

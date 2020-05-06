@@ -2,11 +2,12 @@ from sys import platform
 import pyttsx3
 from pydantic import BaseModel
 
+
 class DanielVoice:
     def __init__(self, speed=180):
         self.speed = speed
         self.init()
-    
+
     def init(self):
         self.engine = pyttsx3.init()
         self.engine.setProperty("rate", self.speed)
@@ -23,11 +24,11 @@ class DanielVoice:
             pass
         else:
             self.engine.setProperty("voice", voice.id)
-    
+
     def await_synthesis(self):
         self.engine.runAndWait()
-        print('Finished synthesis')
-    
+        print("Finished synthesis")
+
     def stop(self):
         self.engine.stop()
 
@@ -35,11 +36,11 @@ class DanielVoice:
         self.engine.save_to_file(text, str(file))
         # print(f'Generating: {text}')
 
+
 class Speech(BaseModel):
     speed: int = 180
     text: str
 
+
 class BulkSpeech(Speech):
     text: list
-
-
