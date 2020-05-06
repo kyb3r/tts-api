@@ -131,7 +131,7 @@ def generate_speech(request: Speech):
 
     print('starting synthesis')
     subprocess.run(["say", "-v", "daniel", "-o", tempfile_name, request.text])
-    print("generated speech for:", request.text)
+    print("generated speech for:", request.text[:20]+'...')
 
     buffer = BytesIO()
 
