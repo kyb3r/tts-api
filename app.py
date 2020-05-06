@@ -129,10 +129,9 @@ def index():
 def generate_speech(request: Speech):
     tempfile_name = tempfile.mktemp()
 
-    with lock:
-        print('starting synthesis')
-        subprocess.run(["say", "-v", "daniel", "-o", tempfile_name, request.text])
-        print("generated speech for:", request.text)
+    print('starting synthesis')
+    subprocess.run(["say", "-v", "daniel", "-o", tempfile_name, request.text])
+    print("generated speech for:", request.text)
 
     buffer = BytesIO()
 
