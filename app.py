@@ -88,9 +88,9 @@ def stream_files(*files):
 
     data = zlib.compress(bson.encode({"data": contents}))
 
-    with tempfile.NamedTemporaryFile(delete=False) as f:
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.dat') as f:
         f.write(data)
-    
+
     return FileResponse(f.name)
 
 
@@ -127,7 +127,7 @@ def index():
 
 @app.post("/generate_speech")
 def generate_speech(request: Speech):
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.aiff') as f:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".aiff") as f:
         print(f.name)
         print("starting synthesis")
         subprocess.run(["say", "-v", "daniel", "-o", f.name, request.text])
